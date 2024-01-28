@@ -78,6 +78,7 @@ struct Podcast {
     std::string url;
     std::string title;
     std::string ext;
+    std::string meta;
     std::size_t timestamp = 0;
 };
 
@@ -88,6 +89,7 @@ struct Options {
     bool reverse_numbers = false;
     bool stop_when_file_found = false;
     bool append_episode_nr = false;
+    bool add_meta = false;
     size_t zero_padded_episode_nr = 0;
     int episode_from = -1;
     int episode_to = -1;

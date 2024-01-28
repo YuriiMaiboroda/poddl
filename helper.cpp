@@ -96,6 +96,7 @@ void Helper::debug_print_options(const Options &options)
     std::cout << "zero_padded_episode_nr: " << options.zero_padded_episode_nr << std::endl;
     std::cout << "newest_first: " << options.newest_first << std::endl;
     std::cout << "reverse_numbers: " << options.reverse_numbers << std::endl;
+    std::cout << "add_meta: " << options.add_meta << std::endl;
     std::cout << "episode_from: " << options.episode_from << std::endl;
     std::cout << "episode_to: " << options.episode_to << std::endl;
     std::cout << "stop_when_file_found -h: " << options.stop_when_file_found << std::endl;
@@ -199,6 +200,9 @@ Options Helper::get_options(const std::vector<std::string> &args) {
             }
 
             i = i + 1;
+        }
+        else if (arg == "-m") {
+            options.add_meta = true;
         }
     }
 

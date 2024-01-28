@@ -53,6 +53,7 @@ void print_help() {
     std::cout << "-n N-N = Download a range of episodes" << std::endl;
     std::cout << "-h = Quit when first existing file is found" << std::endl;
     std::cout << "-h \"search string\" = Quit when first existing file matches the input string" << std::endl;
+    std::cout << "-m = print meta information of episodes to list or additional files" << std::endl;
     std::cout << std::endl;
 }
 
@@ -97,13 +98,17 @@ int main(int argc, const char *argv[]) {
 #ifdef _WIN32
     std::wstring const path = Helper::utf8_to_wide_win_string(options.path);
     std::wstring const temp_path = path + L"/tmp";
+    std::wstring const meta_ext = L"info";
     std::string const print_path = Helper::wide_win_string_to_utf8(path);
     std::string const print_temp_path = Helper::wide_win_string_to_utf8(temp_path);
+    std::string const print_meta_ext = Helper::wide_win_string_to_utf8(meta_ext);
 #else
     std::string const path = options.path;
     std::string const temp_path = path + "/tmp";
+    std::string const meta_ext = "info";
     std::string const print_path = path;
     std::string const print_temp_path = temp_path;
+    std::string const print_meta_ext = meta_ext;
 #endif
     std::ostringstream rss_stream;
 
@@ -157,13 +162,16 @@ int main(int argc, const char *argv[]) {
         std::cout << "Error: No files found" << std::endl;
         return -1;
     }
-        
+
     std::cout << (options.list_only ? "Listing " : "Downloading ") << size << " files" << std::endl << std::endl;
     int count = 1;
 
     for (auto const& item : items) {
         if (options.list_only) {
             std::cout << "[" << item.number << "]" << " " << item.title << std::endl;
+            if (options.add_meta) {
+                std::cout << item.meta << std::endl;
+            }
             count++;
             continue;
         }
@@ -182,14 +190,18 @@ int main(int argc, const char *argv[]) {
 
 #ifdef _WIN32
         std::wstring const file_path = path + L"/" + Helper::utf8_to_wide_win_string(title) + L"." + Helper::utf8_to_wide_win_string(item.ext);
+        std::wstring const file_meta_path = path + L"/" + Helper::utf8_to_wide_win_string(title) + L"." + meta_ext;
         std::wstring const temp_file_path = temp_path + L"/" + Helper::utf8_to_wide_win_string(title) + L"." + Helper::utf8_to_wide_win_string(item.ext);
         std::string const print_file_path = Helper::wide_win_string_to_utf8(file_path);
         std::string const print_temp_file_path = Helper::wide_win_string_to_utf8(temp_file_path);
+        std::string const print_file_meta_path = Helper::wide_win_string_to_utf8(file_meta_path);
 #else
         std::string const file_path = path + "/" + title + "." + item.ext;
+        std::string const file_meta_path = path + "/" + title + "." + meta_ext;
         std::string const temp_file_path = temp_path + "/" + title + "." + item.ext;
         std::string const print_file_path = file_path;
         std::string const print_temp_file_path = temp_file_path;
+        std::string const print_file_meta_path = file_meta_path;
 #endif
 
         if (options.stop_when_file_found) {
@@ -224,6 +236,13 @@ int main(int argc, const char *argv[]) {
                 std::cout << "Error moving temp file. I'm out. " << print_file_path << std::endl;
                 return -1;
             }
+
+            if (options.add_meta) {
+                std::ofstream fs_meta(file_meta_path, std::ostream::out);
+                fs_meta << item.meta << std::endl;
+                fs_meta.close();
+            }
+
         } else {
             std::cout << "Error downloading file " << item.title << std::endl;
         }

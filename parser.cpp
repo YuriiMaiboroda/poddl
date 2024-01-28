@@ -28,6 +28,8 @@
 std::string const enclosure_pattern = "<enclosure.*?url=[\"|'](.+?)[\"|'].*?>";
 std::string const title_pattern = "<title>(.+?)</title>";
 std::string const pubdate_pattern = "<pubDate>(.+?)</pubDate>";
+std::string const description_pattern = "<description>((.|\n)*?)</description>";
+std::string const link_pattern = "<link>(.+?)</link>";
 std::string const cdata_pattern = "<\\!\\[CDATA\\[(.+?)\\]\\]>";
 
 std::string const start_tag = "<item";
@@ -42,6 +44,8 @@ std::vector<Podcast> Parser::get_items(const std::string &xml, int reverse_type)
     std::regex regex_title(title_pattern);
     std::regex regex_cdata(cdata_pattern);
     std::regex regex_pubdate(pubdate_pattern);
+    std::regex regex_description(description_pattern);
+    std::regex regex_link(link_pattern);
 
     bool all_stamps_found = true;
 
@@ -58,12 +62,14 @@ std::vector<Podcast> Parser::get_items(const std::string &xml, int reverse_type)
         std::smatch match_title;
         std::smatch match_cdata;
         std::smatch match_pubdate;
-        
+        std::smatch match_description;
+        std::smatch match_link;
+
         //URL
         if (std::regex_search(item, match_enclosure, regex_enclosure)) {
             url = match_enclosure.str(1);
         }
-        
+
         //Title
         if (std::regex_search(item, match_title, regex_title)) {
             title = match_title.str(1);
@@ -92,11 +98,28 @@ std::vector<Podcast> Parser::get_items(const std::string &xml, int reverse_type)
                 title = match_cdata.str(1);
             }
 
+            std::string description, link, meta;
+
+            if (std::regex_search(item, match_description, regex_description)) {
+                description = match_description.str(1);
+            }
+
+            if (std::regex_search(item, match_link, regex_link)) {
+                link = match_link.str(1);
+            }
+
+            std::ostringstream meta_oss;
+            meta_oss << "title: " << title << std::endl
+                     << "link: " << link << std::endl
+                     << "description: " << description << std::endl;
+            meta = meta_oss.str();
+
             podcast.url = Helper::url_encode_lazy(html_coder.decode(url));
             podcast.title = Helper::clean_filename(html_coder.decode(title));
             podcast.ext = Helper::get_extension(url);
             podcast.timestamp = timestamp;
-            
+            podcast.meta = meta;
+
             output.push_back(podcast);
         }
 
