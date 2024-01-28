@@ -34,7 +34,7 @@ std::string const start_tag = "<item";
 std::string const end_tag = "</item>";
 std::size_t const end_len = end_tag.length();
 
-std::vector<Podcast> Parser::get_items(const std::string &xml, bool reverse) {
+std::vector<Podcast> Parser::get_items(const std::string &xml, int reverse_type) {
     fb::HtmlCoder html_coder;
     std::vector<Podcast> output;
 
@@ -113,7 +113,7 @@ std::vector<Podcast> Parser::get_items(const std::string &xml, bool reverse) {
         std::sort(output.begin(), output.end(), sort_rule);
     }
 
-    if (reverse) {
+    if (reverse_type == Parser::SIMPLE_REVERSE) {
         /* oldest episode first (default) */
         std::reverse(output.begin(), output.end());
     }
@@ -122,7 +122,7 @@ std::vector<Podcast> Parser::get_items(const std::string &xml, bool reverse) {
 
     for (int i = 0; i < size; i++) {
         auto item = &output[i];
-        item->number = (reverse ? i + 1 : size - i);
+        item->number = (reverse_type != Parser::NOT_REVERSE ? i + 1 : size - i);
     }
 
     return output;

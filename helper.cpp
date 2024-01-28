@@ -95,6 +95,7 @@ void Helper::debug_print_options(const Options &options)
     std::cout << "short_names: " << options.short_names << std::endl;
     std::cout << "zero_padded_episode_nr: " << options.zero_padded_episode_nr << std::endl;
     std::cout << "newest_first: " << options.newest_first << std::endl;
+    std::cout << "reverse_numbers: " << options.reverse_numbers << std::endl;
     std::cout << "episode_from: " << options.episode_from << std::endl;
     std::cout << "episode_to: " << options.episode_to << std::endl;
     std::cout << "stop_when_file_found -h: " << options.stop_when_file_found << std::endl;
@@ -132,12 +133,16 @@ Options Helper::get_options(const std::vector<std::string> &args) {
         else if (arg == "-r") {
             options.newest_first = true;
         }
+        else if (arg == "-rr") {
+            options.newest_first = true;
+            options.reverse_numbers = true;
+        }
         else if (arg == "-i") {
             options.append_episode_nr = true;
         }
         else if (arg == "-z") {
             options.zero_padded_episode_nr = 3;
-          
+
             if (i + 1 > last_i) {
                 continue;
             }
@@ -203,8 +208,8 @@ Options Helper::get_options(const std::vector<std::string> &args) {
 void replace_substring(std::string& subject, const std::string& search, const std::string& replace) {
     size_t pos = 0;
     while ((pos = subject.find(search, pos)) != std::string::npos) {
-         subject.replace(pos, search.length(), replace);
-         pos += replace.length();
+        subject.replace(pos, search.length(), replace);
+        pos += replace.length();
     }
 }
 

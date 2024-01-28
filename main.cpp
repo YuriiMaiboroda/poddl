@@ -45,6 +45,7 @@ void print_help() {
     std::cout << "-o = Output path (needed if arguments are passed)" << std::endl;
     std::cout << "-l = Only display list of episodes" << std::endl;
     std::cout << "-r = Download/List newest episodes first" << std::endl;
+    std::cout << "-rr = Download/List newest episodes first with reversed numbers" << std::endl;
     std::cout << "-i = Add episode index/number to file names" << std::endl;
     std::cout << "-s = Use episode index/number as file names (nnn.ext)" << std::endl;
     std::cout << "-z N = Zero pad index/number when -i or -s are used (default = 3 if N are left out)" << std::endl;
@@ -131,7 +132,18 @@ int main(int argc, const char *argv[]) {
 
     const auto xml = rss_stream.str();
     const auto reverse = !options.newest_first;
-    auto items = parser.get_items(xml, reverse);
+    int reverse_type;
+    if (options.reverse_numbers) {
+        reverse_type = Parser::REVERSE_WITH_NUMBERS;
+    }
+    else if (options.newest_first) {
+        reverse_type = Parser::NOT_REVERSE;
+    }
+    else {
+        reverse_type = Parser::SIMPLE_REVERSE;
+    }
+
+    auto items = parser.get_items(xml, reverse_type);
 
     if (options.episode_from >= 0) {
         auto temp = Helper::get_subset(items, options.episode_from, options.episode_to);

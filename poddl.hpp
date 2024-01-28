@@ -85,6 +85,7 @@ struct Options {
     bool list_only = false;
     bool short_names = false;
     bool newest_first = false;
+    bool reverse_numbers = false;
     bool stop_when_file_found = false;
     bool append_episode_nr = false;
     size_t zero_padded_episode_nr = 0;
@@ -97,7 +98,10 @@ struct Options {
 
 class Parser {
 public:
-    std::vector<Podcast> get_items(const std::string &xml, bool reverse);
+    static const int NOT_REVERSE = 0;
+    static const int SIMPLE_REVERSE = 1;
+    static const int REVERSE_WITH_NUMBERS = 2;
+    std::vector<Podcast> get_items(const std::string &xml, int reverse_type);
 };
 
 class Helper {
