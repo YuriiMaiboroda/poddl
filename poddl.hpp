@@ -82,6 +82,15 @@ struct Podcast {
     std::size_t timestamp = 0;
 };
 
+struct Range {
+    int start;
+    int end;
+
+    Range(int start, int end);
+
+    std::string str() const;
+};
+
 struct Options {
     bool list_only = false;
     bool short_names = false;
@@ -91,8 +100,7 @@ struct Options {
     bool append_episode_nr = false;
     bool add_meta = false;
     size_t zero_padded_episode_nr = 0;
-    int episode_from = -1;
-    int episode_to = -1;
+    std::vector<Range> episodes;
     std::string stop_when_file_found_string {};
     std::string url {};
     std::string path {};

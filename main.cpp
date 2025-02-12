@@ -49,8 +49,7 @@ void print_help() {
     std::cout << "-i = Add episode index/number to file names" << std::endl;
     std::cout << "-s = Use episode index/number as file names (nnn.ext)" << std::endl;
     std::cout << "-z N = Zero pad index/number when -i or -s are used (default = 3 if N are left out)" << std::endl;
-    std::cout << "-n N = Download a single episode" << std::endl;
-    std::cout << "-n N-N = Download a range of episodes" << std::endl;
+    std::cout << "-n N[-N][,N[-N]] = Download episodes" << std::endl;
     std::cout << "-h = Quit when first existing file is found" << std::endl;
     std::cout << "-h \"search string\" = Quit when first existing file matches the input string" << std::endl;
     std::cout << "-m = print meta information of episodes to list or additional files" << std::endl;
@@ -98,14 +97,14 @@ int main(int argc, const char *argv[]) {
 #ifdef _WIN32
     std::wstring const path = Helper::utf8_to_wide_win_string(options.path);
     std::wstring const temp_path = path + L"/tmp";
-    std::wstring const meta_ext = L"info";
+    std::wstring const meta_ext = L"txt";
     std::string const print_path = Helper::wide_win_string_to_utf8(path);
     std::string const print_temp_path = Helper::wide_win_string_to_utf8(temp_path);
     std::string const print_meta_ext = Helper::wide_win_string_to_utf8(meta_ext);
 #else
     std::string const path = options.path;
     std::string const temp_path = path + "/tmp";
-    std::string const meta_ext = "info";
+    std::string const meta_ext = "txt";
     std::string const print_path = path;
     std::string const print_temp_path = temp_path;
     std::string const print_meta_ext = meta_ext;
@@ -150,9 +149,18 @@ int main(int argc, const char *argv[]) {
 
     auto items = parser.get_items(xml, reverse_type);
 
-    if (options.episode_from >= 0) {
-        auto temp = Helper::get_subset(items, options.episode_from, options.episode_to);
-        items = temp;
+    if (options.episodes.size() > 0) {
+        std::vector<Podcast> temp_items;
+        for (auto range : options.episodes)
+        {
+            auto temp = Helper::get_subset(items, range.start, range.end);
+            temp_items.insert(
+                temp_items.end(),
+                temp.begin(),
+                temp.end()
+            );
+        }
+        items = temp_items;
     }
 
     auto size = items.size();

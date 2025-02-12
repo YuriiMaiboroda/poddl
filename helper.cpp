@@ -85,6 +85,17 @@ int int_try_parse(std::string text) {
     return 0;
 }
 
+Range::Range(int start, int end) : start(start), end(end) { }
+
+std::string Range::str() const
+{
+    std::stringstream ss;
+    ss << start;
+    if (start != end)
+        ss << "-" << end;
+    return ss.str();
+}
+
 void Helper::debug_print_options(const Options &options) 
 {
     std::cout << "::: OPTIONS :::" << std::endl;
@@ -97,8 +108,14 @@ void Helper::debug_print_options(const Options &options)
     std::cout << "newest_first: " << options.newest_first << std::endl;
     std::cout << "reverse_numbers: " << options.reverse_numbers << std::endl;
     std::cout << "add_meta: " << options.add_meta << std::endl;
-    std::cout << "episode_from: " << options.episode_from << std::endl;
-    std::cout << "episode_to: " << options.episode_to << std::endl;
+    std::cout << "episodes: ";
+    for (int i = 0; i < options.episodes.size(); i++)
+    {
+        std::cout << options.episodes[i].str();
+        if (i < options.episodes.size() - 1)
+            std::cout << ", ";
+    }
+    std::cout << std::endl;
     std::cout << "stop_when_file_found -h: " << options.stop_when_file_found << std::endl;
     std::cout << "stop_when_file_found_string -h: " << options.stop_when_file_found_string << std::endl;
 }
@@ -186,17 +203,26 @@ Options Helper::get_options(const std::vector<std::string> &args) {
             }
 
             auto const n = args[i + 1];
-            auto const d = n.find("-");
 
-            if (d != std::string::npos) {
-                auto const a = n.substr(0, d);
-                auto const b = n.substr(d + 1);
+            std::stringstream stream(n);
+            std::string range_str;
+            while (getline(stream, range_str, ','))
+            {
+                auto const d = range_str.find("-");
 
-                options.episode_from = int_try_parse(a);
-                options.episode_to = int_try_parse(b);
-            } else {
-                options.episode_from = int_try_parse(n);
-                options.episode_to = options.episode_from;
+                int a, b;
+
+                if (d != std::string::npos) {
+                    auto const a_str = range_str.substr(0, d);
+                    auto const b_str = range_str.substr(d + 1);
+
+                    a = int_try_parse(a_str);
+                    b = int_try_parse(b_str);
+                } else {
+                    a = b = int_try_parse(range_str);
+                }
+
+                options.episodes.push_back(Range(a, b));
             }
 
             i = i + 1;
