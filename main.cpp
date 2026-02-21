@@ -52,7 +52,9 @@ void print_help() {
     std::cout << "-n N[-N][,N[-N]] = Download episodes" << std::endl;
     std::cout << "-h = Quit when first existing file is found" << std::endl;
     std::cout << "-h \"search string\" = Quit when first existing file matches the input string" << std::endl;
-    std::cout << "-m = print meta information of episodes to list or additional files" << std::endl;
+    std::cout << "-m = Print meta information of episodes to list or additional files" << std::endl;
+    std::cout << "-om = name of meta infirmation file" << std::endl;
+    std::cout << "-f = Save every episode to separate folder" << std::endl;
     std::cout << std::endl;
 }
 
@@ -197,19 +199,27 @@ int main(int argc, const char *argv[]) {
         }
 
 #ifdef _WIN32
-        std::wstring const file_path = path + L"/" + Helper::utf8_to_wide_win_string(title) + L"." + Helper::utf8_to_wide_win_string(item.ext);
-        std::wstring const file_meta_path = path + L"/" + Helper::utf8_to_wide_win_string(title) + L"." + meta_ext;
+        std::wstring const episode_folder_path = path + (options.out_folders ? L"/" + Helper::utf8_to_wide_win_string(title)  : L"");
+        std::wstring const file_path = episode_folder_path + L"/" + Helper::utf8_to_wide_win_string(title) + L"." + Helper::utf8_to_wide_win_string(item.ext);
+        std::wstring const file_meta_path = episode_folder_path + L"/" + (options.out_meta.size() > 0
+            ? options.out_meta
+            : Helper::utf8_to_wide_win_string(title) + L"." + meta_ext);
         std::wstring const temp_file_path = temp_path + L"/" + Helper::utf8_to_wide_win_string(title) + L"." + Helper::utf8_to_wide_win_string(item.ext);
         std::string const print_file_path = Helper::wide_win_string_to_utf8(file_path);
         std::string const print_temp_file_path = Helper::wide_win_string_to_utf8(temp_file_path);
         std::string const print_file_meta_path = Helper::wide_win_string_to_utf8(file_meta_path);
+        std::string const print_episode_folder_path = Helper::wide_win_string_to_utf8(episode_folder_path);
 #else
-        std::string const file_path = path + "/" + title + "." + item.ext;
-        std::string const file_meta_path = path + "/" + title + "." + meta_ext;
+        std::string const episode_folder_path = path + (options.out_folders ? "/" + title  : "");
+        std::string const file_path = episode_folder_path + "/" + title + "." + item.ext;
+        std::string const file_meta_path = episode_folder_path + "/" + (options.out_meta.size() > 0
+            ? options.out_meta
+            : title + "." + meta_ext);
         std::string const temp_file_path = temp_path + "/" + title + "." + item.ext;
         std::string const print_file_path = file_path;
         std::string const print_temp_file_path = temp_file_path;
         std::string const print_file_meta_path = file_meta_path;
+        std::string const print_episode_folder_path = episode_folder_path;
 #endif
 
         if (options.stop_when_file_found) {
@@ -231,6 +241,11 @@ int main(int argc, const char *argv[]) {
             std::cout << "Skipping file " << print_file_path << std::endl;
 
             count++;
+            continue;
+        }
+
+        if (!FileSystem::create_directory_if_not_exists(episode_folder_path)) {
+            std::cout << "Error: Could not create directory " << print_episode_folder_path << std::endl;
             continue;
         }
 

@@ -41,10 +41,10 @@ size_t Client::curl_write(void* buffer, size_t size, size_t nmemb, void* output_
     if (!output_ptr) {
         return 0;
     }
-    
+
     std::ostream& output_stream = *static_cast<std::ostream*>(output_ptr);
     std::streamsize length = size * nmemb;
-    
+
     if (output_stream.write(static_cast<char*>(buffer), length)) {
         return length;
     }
@@ -55,7 +55,7 @@ size_t Client::curl_write(void* buffer, size_t size, size_t nmemb, void* output_
 CURLcode Client::curl_read(const std::string& url, std::ostream& output_stream) {
     CURLcode code(CURLE_FAILED_INIT);
     CURL* curl = curl_easy_init();
-    
+
     if (curl) {
         curl_easy_setopt(curl, CURLOPT_URL, url.c_str());
         curl_easy_setopt(curl, CURLOPT_USERAGENT, "poddl - podcast downloader");
@@ -68,7 +68,7 @@ CURLcode Client::curl_read(const std::string& url, std::ostream& output_stream) 
         code = curl_easy_perform(curl);
         curl_easy_cleanup(curl);
     }
-    
+
     return code;
 }
 
@@ -76,7 +76,7 @@ bool Client::get_string_stream(std::string url, std::ostringstream &output_strea
     if (CURLE_OK == Client::curl_read(url, output_stream)) {
         return true;
     }
-    
+
     return false;
 }
 
@@ -84,6 +84,7 @@ bool Client::write_file_stream(std::string url, std::ofstream &output_stream) {
     if (CURLE_OK == Client::curl_read(url, output_stream)) {
         return true;
     }
-    
+
     return false;
 }
+

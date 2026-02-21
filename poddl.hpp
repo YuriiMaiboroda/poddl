@@ -99,11 +99,13 @@ struct Options {
     bool stop_when_file_found = false;
     bool append_episode_nr = false;
     bool add_meta = false;
+    bool out_folders = false;
     size_t zero_padded_episode_nr = 0;
     std::vector<Range> episodes;
     std::string stop_when_file_found_string {};
     std::string url {};
     std::string path {};
+    std::string out_meta {};
 };
 
 class Parser {

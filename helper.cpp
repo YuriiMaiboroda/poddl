@@ -108,6 +108,8 @@ void Helper::debug_print_options(const Options &options)
     std::cout << "newest_first: " << options.newest_first << std::endl;
     std::cout << "reverse_numbers: " << options.reverse_numbers << std::endl;
     std::cout << "add_meta: " << options.add_meta << std::endl;
+    std::cout << "out_meta: " << options.out_meta << std::endl;
+    std::cout << "out_folders: " << options.out_folders << std::endl;
     std::cout << "episodes: ";
     for (int i = 0; i < options.episodes.size(); i++)
     {
@@ -139,12 +141,12 @@ Options Helper::get_options(const std::vector<std::string> &args) {
 
     options.url = url_encode_lazy(html_coder.decode(args[0]));
 
-    for (size_t i = 1; i != args.size(); i++) {
+    for (size_t i = 1; i != args_size; i++) {
         auto const arg = args[i];
 
         if (arg == "-l") {
             options.list_only = true;
-        } 
+        }
         else if (arg == "-s") {
             options.short_names = true;
         }
@@ -191,7 +193,7 @@ Options Helper::get_options(const std::vector<std::string> &args) {
             }
 
             auto const h_argument = args[i + 1];
-            
+
             if (h_argument.length() > 0 && h_argument[0] != '-') {
                 options.stop_when_file_found_string = h_argument;
                 i = i + 1;
@@ -230,6 +232,16 @@ Options Helper::get_options(const std::vector<std::string> &args) {
         else if (arg == "-m") {
             options.add_meta = true;
         }
+        else if (arg == "-om") {
+            i = i + 1;
+            if (i > last_i) {
+                continue;
+            }
+            options.out_meta = args[i];
+        }
+        else if (arg == "-f") {
+            options.out_folders = true;
+        }
     }
 
     return options;
@@ -245,7 +257,7 @@ void replace_substring(std::string& subject, const std::string& search, const st
 
 std::vector<Podcast> Helper::get_subset(
     std::vector<Podcast> &items, int number_from, int number_to) {
-    
+
     if (items.size() <= 1) {
         return items;
     }
@@ -253,11 +265,11 @@ std::vector<Podcast> Helper::get_subset(
     if (number_from > number_to) {
         return std::vector<Podcast>{};
     }
-    
+
     if (number_from <= 0) {
         number_from = 1;
     }
-    
+
     if (number_from > items.size()) {
         return std::vector<Podcast>{};
     }
@@ -267,7 +279,7 @@ std::vector<Podcast> Helper::get_subset(
     }
 
     const bool reverse = items[0].number > items[1].number;
-    
+
     if (reverse) {
         std::reverse(items.begin(), items.end());
     }
@@ -288,12 +300,12 @@ bool Helper::string_exists(const std::string &input, const std::string &search) 
     std::string a = input;
     std::string b = search;
 
-    std::transform(a.begin(), a.end(), a.begin(), [](unsigned char c) { 
-        return std::tolower(c); 
+    std::transform(a.begin(), a.end(), a.begin(), [](unsigned char c) {
+        return std::tolower(c);
     });
-    
-    std::transform(b.begin(), b.end(), b.begin(), [](unsigned char c) { 
-        return std::tolower(c); 
+
+    std::transform(b.begin(), b.end(), b.begin(), [](unsigned char c) {
+        return std::tolower(c);
     });
 
     const size_t found = a.find(b);
@@ -307,7 +319,7 @@ std::string Helper::clean_filename(std::string input) {
             replace_substring(input, x.first, x.second);
         }
     }
-    
+
     return input;
 }
 
@@ -376,10 +388,10 @@ std::string Helper::wide_win_string_to_utf8(std::wstring input) {
 
     char* str = new char[chars_num];
     chars_num = WideCharToMultiByte(CP_UTF8, 0, input.c_str(), -1, str, chars_num, NULL, NULL);
-    
+
     std::string output(str);
     delete[] str;
-    
+
     return output;
 }
 #endif
